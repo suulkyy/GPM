@@ -278,9 +278,15 @@ def update_GPM (model, mat_list, threshold, feature_list=[]):
 def main(args):
     tstart=time.time()
     ## Device Setting 
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    torch.manual_seed(args.seed)
+    random.seed(args.seed)
     np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False 
     # Choose any task order - ref {yoon et al. ICLR 2020}
     task_order = [np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]),
                   np.array([15, 12, 5, 9, 7, 16, 18, 17, 1, 0, 3, 8, 11, 14, 10, 6, 2, 4, 13, 19]),
@@ -473,6 +479,9 @@ if __name__ == "__main__":
                         help='hold before decaying lr (default: 6)')
     parser.add_argument('--lr_factor', type=int, default=2, metavar='LRF',
                         help='lr decay factor (default: 2)')
+    # CUDA parameters
+    parser.add_argument('--gpu', type=str, default="0", metavar='GPU',
+                        help="GPU ID for single GPU training")
 
 
     args = parser.parse_args()

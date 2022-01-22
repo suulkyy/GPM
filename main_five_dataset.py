@@ -324,9 +324,15 @@ def update_GPM (model, mat_list, threshold, feature_list=[],):
 def main(args):
     tstart=time.time()
     ## Device Setting 
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    torch.manual_seed(args.seed)
+    random.seed(args.seed)
     np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False 
     ## Load CIFAR100 DATASET
     from dataloader import five_datasets as data_loader
     data,taskcla,inputsize=data_loader.get(pc_valid=args.pc_valid)
@@ -502,6 +508,9 @@ if __name__ == "__main__":
                         help='hold before decaying lr (default: 6)')
     parser.add_argument('--lr_factor', type=int, default=3, metavar='LRF',
                         help='lr decay factor (default: 2)')
+    # CUDA parameters
+    parser.add_argument('--gpu', type=str, default="0", metavar='GPU',
+                        help="GPU ID for single GPU training")
 
 
     args = parser.parse_args()

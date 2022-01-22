@@ -199,9 +199,15 @@ def update_GPM (model, mat_list, threshold, feature_list=[],):
 def main(args):
     tstart=time.time()
     ## Device Setting 
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    torch.manual_seed(args.seed)
+    random.seed(args.seed)
     np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False 
     ## Load PMNIST DATASET
     from dataloader import pmnist as pmd
     data,taskcla,inputsize=pmd.get(seed=args.seed, pc_valid=args.pc_valid)
@@ -352,6 +358,9 @@ if __name__ == "__main__":
                         help='number of output units in MLP (default: 10)')
     parser.add_argument('--n_tasks', type=int, default=10, metavar='NT',
                         help='number of tasks (default: 10)')
+    # CUDA parameters
+    parser.add_argument('--gpu', type=str, default="0", metavar='GPU',
+                        help="GPU ID for single GPU training")
 
     args = parser.parse_args()
     print('='*100)
